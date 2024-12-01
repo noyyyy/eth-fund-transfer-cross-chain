@@ -30,16 +30,23 @@ RUN pnpm build
 # Production stage
 FROM node:20-alpine
 
-WORKDIR /app/packages/server
+WORKDIR /app
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy necessary files from builder
-COPY --from=builder /app/packages/server/dist ./dist
-COPY --from=builder /app/packages/server/node_modules ./node_modules
-COPY --from=builder /app/packages/server/package.json ./
-COPY --from=builder /app/packages/server/prisma ./prisma
+# Copy workspace files
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy server files
+COPY --from=builder /app/packages/server/dist ./packages/server/dist
+COPY --from=builder /app/packages/server/package.json ./packages/server/
+COPY --from=builder /app/packages/server/prisma ./packages/server/prisma
+
+WORKDIR /app/packages/server
 
 # Expose the port the app runs on
 EXPOSE 5001

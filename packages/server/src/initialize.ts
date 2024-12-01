@@ -2,7 +2,6 @@ import { Address, createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia, mantleSepoliaTestnet } from "viem/chains";
 import { prisma } from "./utils";
-import { ChainMap } from "./blockchain/constants";
 
 export async function initialize() {
   const pk = process.env.PRIVATE_KEY;

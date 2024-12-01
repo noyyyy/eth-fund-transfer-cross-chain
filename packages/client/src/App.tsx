@@ -6,7 +6,9 @@ import { ApiResponse } from "./types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-export const BASE_URL = `http://localhost:5001`;
+export const BASE_URL = import.meta.env.PROD
+  ? "https://eth-fund-transfer-server.fly.dev" // 替换为实际的生产环境 URL
+  : "http://localhost:5001";
 
 function App() {
   const { data, error, isLoading } = useSWR<ApiResponse>(

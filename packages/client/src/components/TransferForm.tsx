@@ -11,7 +11,6 @@ interface TransferFormProps {
 
 export function TransferForm({
   currentChainId,
-  address,
   availableChains,
 }: TransferFormProps) {
   const [amount, setAmount] = useState("");
@@ -43,7 +42,7 @@ export function TransferForm({
         throw new Error("Transfer failed");
       }
 
-      const result = await response.json();
+      await response.json();
       alert("Transfer initiated successfully!");
       setAmount("");
       setTargetChain("");
