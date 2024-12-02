@@ -1,4 +1,5 @@
 import {
+  Account,
   Address,
   createPublicClient,
   createWalletClient,
@@ -46,12 +47,16 @@ export async function initialize() {
   });
 
   // refresh balance
-  await refreshBalance(sepolia.id, account.address);
-  await refreshBalance(mantleSepoliaTestnet.id, account.address);
+  await refreshFullBalance(account.address);
+}
+
+export async function refreshFullBalance(address: Address) {
+  await refreshBalance(sepolia.id, address);
+  await refreshBalance(mantleSepoliaTestnet.id, address);
 
   await refreshErc20Balance(
     mantleSepoliaTestnet.id,
-    account.address,
+    address,
     WETH_MANTA_SEPOLIA,
   );
 }

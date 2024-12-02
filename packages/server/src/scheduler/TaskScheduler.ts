@@ -13,6 +13,8 @@ import { mantleSepoliaTestnet, sepolia } from "viem/chains";
 import { MessageStatus } from "@mantleio/sdk";
 import { BigNumber } from "ethers";
 import { WETH_MANTA_SEPOLIA } from "../blockchain/constants";
+import { privateKeyToAccount } from "viem/accounts";
+import { refreshFullBalance } from "../initialize";
 
 export class TaskScheduler {
   private prisma: PrismaClient;
@@ -49,8 +51,12 @@ export class TaskScheduler {
   }
 
   private async processTask(task: TransferTask) {
-    // TODO: Implement specific task processing logic
-    // e.g., call blockchain interface, update task status
+    const pk = process.env.PRIVATE_KEY;
+
+    const account = privateKeyToAccount(pk as `0x${string}`);
+
+    refreshFullBalance(account.address);
+
     if (task.status === "Queue") {
       if (
         task.fromChain === sepolia.id &&
