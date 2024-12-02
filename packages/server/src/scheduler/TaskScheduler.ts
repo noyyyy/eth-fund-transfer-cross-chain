@@ -85,22 +85,30 @@ export class TaskScheduler {
 
     // execute submit proof
     if (task.status === "ReadyToProve") {
-      await submitProof(task.FromTxHash);
+      try {
+        await submitProof(task.FromTxHash);
 
-      await prisma.transferTask.update({
-        where: { id: task.id },
-        data: { status: "ProveSent" },
-      });
+        await prisma.transferTask.update({
+          where: { id: task.id },
+          data: { status: "ProveSent" },
+        });
+      } catch (error) {
+        console.error(`Failed to submit proof for task ${task.id}:`, error);
+      }
     }
 
     // execute withdraw
     if (task.status === "ReadyToWithdraw") {
-      await withdrawAssets(task.FromTxHash);
+      try {
+        await withdrawAssets(task.FromTxHash);
 
-      await prisma.transferTask.update({
-        where: { id: task.id },
-        data: { status: "WithdrawSent" },
-      });
+        await prisma.transferTask.update({
+          where: { id: task.id },
+          data: { status: "WithdrawSent" },
+        });
+      } catch (error) {
+        console.error(`Failed to withdraw assets for task ${task.id}:`, error);
+      }
     }
 
     // check task status via mantle sdk
@@ -139,6 +147,13 @@ export class TaskScheduler {
         await prisma.transferTask.update({
           where: { id: task.id },
           data: { status: "ReadyToProve" },
+        });
+        break;
+
+      case MessageStatus.IN_CHALLENGE_PERIOD:
+        await prisma.transferTask.update({
+          where: { id: task.id },
+          data: { status: "WaitForChallenge" },
         });
         break;
 

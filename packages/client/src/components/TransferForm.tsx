@@ -28,7 +28,6 @@ export function TransferForm({
   const [selectedToken, setSelectedToken] = useState("");
   const [isTransferring, setIsTransferring] = useState(false);
 
-  // 组合所有可用的代币
   const availableTokens: Token[] = [
     // Native token
     ...(nativeBalance
