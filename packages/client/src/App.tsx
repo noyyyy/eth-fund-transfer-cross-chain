@@ -7,7 +7,7 @@ import { ApiResponse } from "./types";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export const BASE_URL = import.meta.env.PROD
-  ? "https://eth-fund-transfer-server.fly.dev" // 替换为实际的生产环境 URL
+  ? "https://eth-fund-transfer-server.fly.dev"
   : "http://localhost:5001";
 
 function App() {
@@ -32,8 +32,10 @@ function App() {
           {data.account.NativeBalance.map((balance) => (
             <BalanceCard
               key={balance.id}
-              balance={balance}
+              chainId={balance.networkChainId}
               address={data.account.address}
+              nativeBalances={data.account.NativeBalance}
+              erc20Balances={data.account.ERC20Balance}
               availableChains={data.account.NativeBalance}
             />
           ))}

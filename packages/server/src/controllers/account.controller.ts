@@ -6,7 +6,7 @@ import { STANDARD } from "../constants/request";
 export const getAccount = async (_: FastifyRequest, reply: FastifyReply) => {
   try {
     const account = await prisma.account.findFirst({
-      select: { address: true, NativeBalance: true },
+      select: { address: true, NativeBalance: true, ERC20Balance: true },
     });
 
     return reply.code(STANDARD.OK.statusCode).send({

@@ -16,6 +16,8 @@ export const ChainMap = {
   5003: mantleSepoliaTestnet,
 };
 
+export const WETH_MANTA_SEPOLIA = "0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111";
+
 // export const tokenMap = {
 //   [mantleSepoliaTestnet.id]: ["0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111"],
 // };

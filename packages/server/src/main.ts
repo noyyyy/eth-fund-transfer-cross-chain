@@ -59,8 +59,8 @@ const startServer = async () => {
   });
 
   // listen event
-  createEventListener(sepolia.id);
-  createEventListener(mantleSepoliaTestnet.id);
+  // createEventListener(sepolia.id);
+  // createEventListener(mantleSepoliaTestnet.id);
 
   // Graceful shutdown
   const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];

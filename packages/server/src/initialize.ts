@@ -1,7 +1,20 @@
-import { Address, createPublicClient, createWalletClient, http } from "viem";
+import {
+  Address,
+  createPublicClient,
+  createWalletClient,
+  http,
+  parseAbi,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia, mantleSepoliaTestnet } from "viem/chains";
 import { prisma } from "./utils";
+import { ChainMap, WETH_MANTA_SEPOLIA } from "./blockchain/constants";
+
+const erc20Abi = parseAbi([
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+]);
 
 export async function initialize() {
   const pk = process.env.PRIVATE_KEY;
@@ -35,6 +48,12 @@ export async function initialize() {
   // refresh balance
   await refreshBalance(sepolia.id, account.address);
   await refreshBalance(mantleSepoliaTestnet.id, account.address);
+
+  await refreshErc20Balance(
+    mantleSepoliaTestnet.id,
+    account.address,
+    WETH_MANTA_SEPOLIA,
+  );
 }
 
 async function refreshBalance(chainId: number, address: Address) {
@@ -56,5 +75,51 @@ async function refreshBalance(chainId: number, address: Address) {
       balance: balance.toString(),
     },
     update: { balance: balance.toString() },
+  });
+}
+
+async function refreshErc20Balance(
+  chainId: number,
+  accountAddress: Address,
+  tokenAddress: Address,
+) {
+  const chain = ChainMap[chainId];
+  const client = createPublicClient({ chain: chain, transport: http() });
+
+  // Get token balance
+  const balance = await client.readContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [accountAddress],
+  });
+
+  // Get token symbol
+  const symbol = await client.readContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+
+  // Update or create token balance record
+  await prisma.eRC20Balance.upsert({
+    where: {
+      contractAddress_accountAddress_networkChainId: {
+        accountAddress: accountAddress,
+        networkChainId: chainId,
+        contractAddress: tokenAddress,
+      },
+    },
+    create: {
+      accountAddress: accountAddress,
+      networkChainId: chainId,
+      contractAddress: tokenAddress,
+      balance: balance.toString(),
+      symbol: symbol,
+    },
+    update: {
+      balance: balance.toString(),
+      symbol: symbol,
+    },
   });
 }

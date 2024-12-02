@@ -39,15 +39,17 @@ model NativeBalance {
 }
 
 model ERC20Balance {
-  id        Int @id @default(autoincrement())
-  accountId Int
-  networkId Int
+  id Int @id @default(autoincrement())
 
+  balance         Decimal @db.Decimal(78, 0)
+  symbol          String
   contractAddress String
-  Account         Account? @relation(fields: [accountAddress], references: [address])
-  accountAddress  String?
-  Network         Network? @relation(fields: [networkChainId], references: [chainId])
+  Account         Account @relation(fields: [accountAddress], references: [address])
+  accountAddress  String
+  Network         Network @relation(fields: [networkChainId], references: [chainId])
   networkChainId  Int
+
+  @@unique([contractAddress, accountAddress, networkChainId])
 }
 
 model TransferTask {
@@ -65,9 +67,16 @@ model TransferTask {
 
 enum TaskStatus {
   Queue
-  WaitFromSendingConfirmed
-  WaitFromReceive
-  Finished
+  TriggerSent
+  Pending
+  Failed
+  WaitForStateRoot
+  ReadyToProve
+  ProveSent
+  WaitForChallenge
+  ReadyToWithdraw
+  WithdrawSent
+  Success
   Cancelled
 }
 

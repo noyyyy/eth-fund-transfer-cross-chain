@@ -1,25 +1,52 @@
 import { useState } from "react";
-import { NativeBalance } from "../types";
+import { NativeBalance, ERC20Balance } from "../types";
 import { BASE_URL } from "../App";
-import { parseEther, zeroAddress } from "viem";
+import { formatEther, parseEther, zeroAddress } from "viem";
+
+interface Token {
+  address: string;
+  symbol: string;
+  balance: string;
+}
 
 interface TransferFormProps {
-  currentChainId: string;
+  currentChainId: number;
   address: string;
   availableChains: NativeBalance[];
+  nativeBalance?: NativeBalance;
+  erc20Balances?: ERC20Balance[];
 }
 
 export function TransferForm({
   currentChainId,
   availableChains,
+  nativeBalance,
+  erc20Balances,
 }: TransferFormProps) {
   const [amount, setAmount] = useState("");
   const [targetChain, setTargetChain] = useState("");
+  const [selectedToken, setSelectedToken] = useState("");
   const [isTransferring, setIsTransferring] = useState(false);
 
+  // 组合所有可用的代币
+  const availableTokens: Token[] = [
+    // Native token
+    nativeBalance && {
+      address: zeroAddress,
+      symbol: currentChainId === 11155111 ? "ETH" : "MNT",
+      balance: nativeBalance.balance,
+    },
+    // ERC20 tokens
+    ...(erc20Balances?.map((token) => ({
+      address: token.contractAddress,
+      symbol: token.symbol,
+      balance: token.balance,
+    })) || []),
+  ].filter((token): token is Token => token !== false);
+
   const handleTransfer = async () => {
-    if (!amount || !targetChain) {
-      alert("Please enter amount and select destination chain");
+    if (!amount || !targetChain || !selectedToken) {
+      alert("Please enter amount, select token and destination chain");
       return;
     }
 
@@ -34,7 +61,7 @@ export function TransferForm({
           fromChainId: currentChainId,
           toChainId: targetChain,
           amount: parseEther(amount).toString(),
-          fromTokenAddress: zeroAddress, // for sending eth
+          fromTokenAddress: selectedToken,
         }),
       });
 
@@ -68,9 +95,26 @@ export function TransferForm({
             onChange={(e) => setAmount(e.target.value)}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm opacity-70">
-            {currentChainId == "11155111" ? "ETH" : "MNT"}
+            {availableTokens.find((t) => t.address === selectedToken)?.symbol ||
+              ""}
           </span>
         </div>
+      </div>
+      <div className="flex gap-2">
+        <select
+          className="p-2 rounded border w-full"
+          value={selectedToken}
+          onChange={(e) => setSelectedToken(e.target.value)}
+        >
+          <option value="" disabled>
+            Select token
+          </option>
+          {availableTokens.map((token) => (
+            <option key={token.address} value={token.address}>
+              {token.symbol} ({formatEther(BigInt(token.balance))} available)
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex gap-2">
         <select
