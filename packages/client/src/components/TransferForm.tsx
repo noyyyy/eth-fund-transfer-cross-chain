@@ -31,18 +31,22 @@ export function TransferForm({
   // 组合所有可用的代币
   const availableTokens: Token[] = [
     // Native token
-    nativeBalance && {
-      address: zeroAddress,
-      symbol: currentChainId === 11155111 ? "ETH" : "MNT",
-      balance: nativeBalance.balance,
-    },
+    ...(nativeBalance
+      ? [
+          {
+            address: zeroAddress,
+            symbol: currentChainId === 11155111 ? "ETH" : "MNT",
+            balance: nativeBalance.balance,
+          },
+        ]
+      : []),
     // ERC20 tokens
     ...(erc20Balances?.map((token) => ({
       address: token.contractAddress,
       symbol: token.symbol,
       balance: token.balance,
     })) || []),
-  ].filter((token): token is Token => token !== false);
+  ];
 
   const handleTransfer = async () => {
     if (!amount || !targetChain || !selectedToken) {
