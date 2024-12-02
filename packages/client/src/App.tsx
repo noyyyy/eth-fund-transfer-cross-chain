@@ -27,7 +27,6 @@ function App() {
         <p className="mb-4">
           Address: <span className="font-mono">{data.account.address}</span>
         </p>
-        <h3 className="text-xl font-semibold mb-4">Native Balances:</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
           {data.account.NativeBalance.map((balance) => (
             <BalanceCard

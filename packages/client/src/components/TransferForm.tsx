@@ -29,12 +29,12 @@ export function TransferForm({
   const [isTransferring, setIsTransferring] = useState(false);
 
   const availableTokens: Token[] = [
-    // Native token
-    ...(nativeBalance
+    // Native token (only allow native token transfer on Sepolia)
+    ...(nativeBalance && currentChainId === 11155111
       ? [
           {
             address: zeroAddress,
-            symbol: currentChainId === 11155111 ? "ETH" : "MNT",
+            symbol: "ETH",
             balance: nativeBalance.balance,
           },
         ]
